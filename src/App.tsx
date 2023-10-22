@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import Card from "./components/Card";
+
+type CardListType = null | {
+  info: {
+    count: number;
+    pages: number;
+    next: string;
+    prev: null;
+  };
+  results: [
+    {
+      id: number;
+      name: string;
+      status: string;
+      species: string;
+      type: string;
+      gender: string;
+      origin: {
+        name: string;
+        url: string;
+      };
+      location: {
+        name: string;
+        url: string;
+      };
+      image: string;
+      episode: string[];
+      url: string;
+      created: string;
+    }
+  ];
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [cardList, setCardList] = useState<CardListType>(null);
+  const [loader, setLoader] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoader(true);
+      const data = await fetch("https://rickandmortyapi.com/api/character");
+      const json = await data.json();
+      return json;
+    };
+    fetchData()
+      .then((json) => {
+        setCardList(json);
+        setLoader(false);
+      })
+      .finally(() => console.log("запрос выполнен"));
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      {cardList?.results?.map((card) => (
+        <Card
+          key={card.id}
+          name={card.name}
+          sex={card.gender}
+          image={card.image}
+        />
+      ))}
+    </div>
+  );
 }
 
-export default App
+export default App;
